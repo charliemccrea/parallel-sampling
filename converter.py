@@ -5,12 +5,9 @@
 # parallel sampling programs.  The output file from the encode option 
 # can be decoded by this same script with the -d option.
 
-from PIL import Image
+import Image
 import sys
 import getopt
-
-#image = imageio.imread(filename)
-#dimensions = im.shape #(w,h,3)
 
 #Print usage for this script's options
 def usage():
@@ -26,7 +23,8 @@ def toText(filename):
     output.write("%d %d\n" % (width, height))
     for x in range(width):
         for y in range(height):
-            output.write("%d\n" % pixels[x,y])
+            s = str(pixels[x,y][0])
+            output.write(s + "\n")
     return;
 
 #Take text-based representation and convert to image format.
