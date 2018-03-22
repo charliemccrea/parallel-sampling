@@ -5,7 +5,7 @@
 # parallel sampling programs.  The output file from the encode option 
 # can be decoded by this same script with the -d option.
 
-import Image
+from PIL import Image
 import sys
 import getopt
 
