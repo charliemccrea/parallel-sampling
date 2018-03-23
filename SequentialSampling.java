@@ -27,12 +27,14 @@ public class SequentialSampling
 		int height = 0;
 		String[] dim;
 		String dimStr;
+		long startTime;
+		long endTime;
 
 		try
 		{
 			in     = new Scanner(new File(args[0])); //For filename input.
 			dimStr = in.nextLine();
-			System.out.println(dimStr);
+			System.out.println("WxH = " + dimStr);
 			dim    = dimStr.split(" ");
 			width  = Integer.parseInt(dim[0]);
 			height = Integer.parseInt(dim[1]);
@@ -57,7 +59,10 @@ public class SequentialSampling
 
 		ArrayList<Point> darts = new ArrayList<Point>();
 		int failedPts = 0;
+		int numConflicts = 0;
 		int itrs = 0;
+
+		startTime = System.currentTimeMillis();
 
 		while (failedPts < MAX_FAILED_PTS && itrs < MAX_ITERATIONS)
 		{
@@ -83,9 +88,10 @@ public class SequentialSampling
 						{
 							if (pixels[a][b])
 							{
-								System.err.println("Conflict!");
+								//System.err.println("Conflict!");
 								failedPts++;
 								conflict = true;
+								numConflicts++;
 								//System.out.println("Failed point! " + failedPts);
 							}
 						}
@@ -102,6 +108,11 @@ public class SequentialSampling
 			itrs++;
 		}
 
+		endTime = System.currentTimeMillis();
+
+		System.out.println("Number of conflicts: " + numConflicts);
+		System.out.println("Creating SVG file...");
+
 		try
 		{
 			outSVG(width,height,darts,args[0], args[1]);
@@ -111,7 +122,9 @@ public class SequentialSampling
 			e.printStackTrace();
 		}
 
-		System.out.println("Done. Size: " + darts.size());
+		System.out.println("Done");
+		System.out.println("Number of darts: " + darts.size());
+		System.out.println("Runtime: " + (endTime - startTime) + " ms");
 	}
 
 	public static void outSVG(int width, int height, ArrayList<Point> pts, String grey, String picture) throws IOException
@@ -145,6 +158,6 @@ public class SequentialSampling
 		BufferedWriter write = new BufferedWriter(new FileWriter(grey + ".html", false));
 		write.write(str.toString());
 		write.close();
-		System.err.println("\n*** Wrote new SVG! ***\n");
+		System.err.println("Wrote new SVG");
 	}
 }
