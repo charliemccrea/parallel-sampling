@@ -1,11 +1,14 @@
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class SequentialSampling {
 
 	public static final int RADIUS = 20;
-	public static final int MAX_FAILED_PTS = 1000;
+	public static final int MAX_FAILED_PTS = 100;
 
 	public static void main(String[] args) {
 		Scanner in = new Scanner(System.in);
@@ -27,13 +30,13 @@ public class SequentialSampling {
 
 		int failedPts = 0;
 		while (failedPts < MAX_FAILED_PTS) {
-			System.out.println("Looping: ");
 			int x = (int) Math.round(Math.random() * width);
 			int y = (int) Math.round(Math.random() * height);
-			System.out.print(x + " "  + y + "\n");
+			System.err.print(x + " "  + y + "\n");
 			Point pt = new Point(x, y);
 			if (darts.contains(pt)) {
-
+        System.out.println("Point used already! " + failedPts);
+        failedPts++;
 			} else {
 				boolean conflict = false;
 				for (int i = -1 * RADIUS; i < RADIUS && !conflict; i++) {
@@ -42,35 +45,46 @@ public class SequentialSampling {
 						int b = j + y;
 						if (a >= 0 && a < width && b >= 0 && b < height) {
 							if (pixels[a][b]) {
-								System.out.println("Conflict!");
+								System.err.println("Conflict!");
 								failedPts++;
 								conflict = true;
+                System.out.println("Failed point! " + failedPts);
 							}
 						}
 					}
 				}
 				if (!conflict) {
-					failedPts = 0;
+//					failedPts = 0;
 					// Add point to darts array list, will add to svg image.
 					darts.add(pt);
-					// Add svg circle
-				}
+          try {
+				    outSVG(width,height,darts,"puppy.jpg");
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
 			}
 		}
 	}
-	//"     <circle cx=\""+width+"\" cy=\""+height+"\" r=\"5\" stroke=\"black\" stroke-width=\"3\" fill=\"black\"/>\n" +
-	// needs to be placed in a loop to go through points in an array list
-	// need to print to an out svg file
-	public static void outSVG(int width, int height, ArrayList<Point> pts, String file) {
+	
+  public static void outSVG(int width, int height, ArrayList<Point> pts, String file) 
+    throws IOException {
 		// Add a circle tag for each successful point
 		// Output as an SVG file.
-		System.out.println("<svg width=\""+ width +"\" height=\""+height+"\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n" + 
-				"     <filter id=\"grayscale\">\n" + 
-				"          <feColorMatrix type=\"saturate\" values=\"0\"/>\n" + 
-				"     </filter>\n" + 
-				"     <image class=\"bw\" filter=\"url(#grayscale)\" width=\"100%\" height=\"100%\" xlink:href=\"image.jpg\" />\n" + 
-				"     <image class=\"color\" width=\"100%\" height=\"100%\" xlink:href=\"image.jpg\" />\n" + 
-				"</svg>");
-		
+    StringBuilder str = new StringBuilder();
+    str.append("<svg width=\""+ width +"\" height=\""+height+"\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n");
+    str.append("<filter id=\"grayscale\">\n<feColorMatrix type=\"saturate\" values=\"0\"/>\n</filter>\n");
+
+    //String file will be the filename of the picture to use in SVG file.
+    str.append("<image x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\" xlink:href=\"" + file + "\"/>\n");
+    for (Point p : pts) {
+      str.append("<circle stroke=\"red\" cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"4\" fill=\"none\"/>\n");
+    }
+    str.append("</svg>");
+    //Write str.toString() to file, open in browser
+    BufferedWriter write = new BufferedWriter(new FileWriter(file + ".svg", false));
+    write.write(str.toString());
+    write.close();
+    System.err.println("\n***Wrote new SVG!***\n");
 	}
 }
