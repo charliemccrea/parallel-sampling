@@ -27,6 +27,8 @@ public class SequentialSampling
 		int height = 0;
 		String[] dim;
 		String dimStr;
+		long startTime;
+		long endTime;
 
 		try
 		{
@@ -59,6 +61,8 @@ public class SequentialSampling
 		int failedPts = 0;
 		int numConflicts = 0;
 		int itrs = 0;
+
+		startTime = System.currentTimeMillis();
 
 		while (failedPts < MAX_FAILED_PTS && itrs < MAX_ITERATIONS)
 		{
@@ -104,6 +108,8 @@ public class SequentialSampling
 			itrs++;
 		}
 
+		endTime = System.currentTimeMillis();
+
 		System.out.println("Number of conflicts: " + numConflicts);
 		System.out.println("Creating SVG file...");
 
@@ -116,7 +122,9 @@ public class SequentialSampling
 			e.printStackTrace();
 		}
 
-		System.out.println("Done.\nNumber of darts: " + darts.size());
+		System.out.println("Done");
+		System.out.println("Number of darts: " + darts.size());
+		System.out.println("Runtime: " + (endTime - startTime) + " ms");
 	}
 
 	public static void outSVG(int width, int height, ArrayList<Point> pts, String grey, String picture) throws IOException
