@@ -1,6 +1,7 @@
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Random;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,6 +10,9 @@ public class SequentialSampling {
 
 	public static final int RADIUS = 20;
 	public static final int MAX_FAILED_PTS = 100;
+  public static Random rand = new Random(0);
+  /* DEBUG ATTRS */
+  public static final int MAX_ITERATIONS = 100;
 
 	public static void main(String[] args) {
 		Scanner in = new Scanner(System.in);
@@ -29,9 +33,10 @@ public class SequentialSampling {
 		ArrayList<Point> darts = new ArrayList<Point>();
 
 		int failedPts = 0;
-		while (failedPts < MAX_FAILED_PTS) {
-			int x = (int) Math.round(Math.random() * width);
-			int y = (int) Math.round(Math.random() * height);
+		int itrs = 0;
+    while (failedPts < MAX_FAILED_PTS && itrs < MAX_ITERATIONS) {
+			int x = (int) Math.round(rand.nextDouble() * width);
+			int y = (int) Math.round(rand.nextDouble() * height);
 			System.err.print(x + " "  + y + "\n");
 			Point pt = new Point(x, y);
 			if (darts.contains(pt)) {
@@ -56,7 +61,8 @@ public class SequentialSampling {
 				if (!conflict) {
 //					failedPts = 0;
 					// Add point to darts array list, will add to svg image.
-					darts.add(pt);
+					System.out.println("Added " + pt.getX() + " " + pt.getY());
+          darts.add(pt);
           try {
 				    outSVG(width,height,darts,"puppy.jpg");
           } catch (IOException e) {
@@ -64,7 +70,9 @@ public class SequentialSampling {
           }
         }
 			}
+      itrs++;
 		}
+    System.out.println("Done. Size: " + darts.size());
 	}
 	
   public static void outSVG(int width, int height, ArrayList<Point> pts, String file) 
@@ -73,13 +81,17 @@ public class SequentialSampling {
 		// Output as an SVG file.
     StringBuilder str = new StringBuilder();
     str.append("<svg width=\""+ width +"\" height=\""+height+"\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n");
-    str.append("<filter id=\"grayscale\">\n<feColorMatrix type=\"saturate\" values=\"0\"/>\n</filter>\n");
-
     //String file will be the filename of the picture to use in SVG file.
-    str.append("<image x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\" xlink:href=\"" + file + "\"/>\n");
+    str.append("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"" 
+        + width + "\" height=\"" + height + "\">\n<image xlink:href=\"" 
+        + file +"\" x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" +height+ "\"/>\n"
+        + "</pattern>\n</defs>\n");
+    str.append("<path fill=\"url(#bg_img)\"/>");
+    //str.append("<image x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\" xlink:href=\"" + file + "\"/>\n");
     for (Point p : pts) {
-      str.append("<circle stroke=\"red\" cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"4\" fill=\"none\"/>\n");
+      str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"1\" fill=\"none\" stroke=\"blue\" />\n");
     }
+      //str.append("<circle cx=\"" + pts.get(0).getX() + "\" cy=\"" + pts.get(0).getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"3\" fill=\"none\" stroke=\"blue\" />\n");
     str.append("</svg>");
     //Write str.toString() to file, open in browser
     BufferedWriter write = new BufferedWriter(new FileWriter(file + ".svg", false));
