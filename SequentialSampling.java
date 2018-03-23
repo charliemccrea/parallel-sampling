@@ -58,7 +58,9 @@ public class SequentialSampling {
 			}
 		}
 	}
-	
+	//"     <circle cx=\""+width+"\" cy=\""+height+"\" r=\"5\" stroke=\"black\" stroke-width=\"3\" fill=\"black\"/>\n" +
+	// needs to be placed in a loop to go through points in an array list
+	// need to print to an out svg file
 	public static void outSVG(int width, int height, ArrayList<Point> pts, String file) {
 		// Add a circle tag for each successful point
 		// Output as an SVG file.
