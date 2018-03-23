@@ -120,14 +120,20 @@ public class SequentialSampling
 		// Output as an SVG file.
 		System.out.println("Picture background: " + picture);
 		StringBuilder str = new StringBuilder();
-		str.append("<html>\n<style> svg { background-image: url(\""+picture+"\"); }</style>");
-		str.append("<svg width=\""+ width +"\" height=\""+height+"\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n");
+		str.append(String.format("<html>\n<style>\n\tsvg {\n\t\tbackground-image: url(\"%s\");\n\t}\n</style>", picture));
+    str.append(String.format("<svg width=\"%d\" height=\"%d\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n", width, height));
+    str.append(String.format("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"%d\" height=\"%d\">\n<image xlink:href=\"%s\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\"/>\n</pattern>\n</defs>\n", width, height, grey, width, height);
+    str.append(String.format("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\"%d\" height=\"%d\"/>", width, height));
+
+
+    //str.append("<html>\n<style> svg { background-image: url(\""+picture+"\"); }</style>");
+		//str.append("<svg width=\""+ width +"\" height=\""+height+"\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n");
 		//String file will be the filename of the picture to use in SVG file.
-		str.append("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\""
-			+ width + "\" height=\"" + height + "\">\n<image xlink:href=\""
-			+ grey +"\" x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" +height+ "\"/>\n"
-			+ "</pattern>\n</defs>\n");
-		str.append("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\""+width+"\" height=\""+height+"\"/>");
+		//str.append("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\""
+		//	+ width + "\" height=\"" + height + "\">\n<image xlink:href=\""
+		//	+ grey +"\" x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" +height+ "\"/>\n"
+		//	+ "</pattern>\n</defs>\n");
+		//str.append("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\""+width+"\" height=\""+height+"\"/>");
 		//str.append("<image x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\" xlink:href=\"" + file + "\"/>\n");
 		for (Point p : pts)
 		{
