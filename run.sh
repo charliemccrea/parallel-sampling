@@ -12,4 +12,4 @@ echo ""
 echo "=== TEST 3: Color References file ==="
 java SequentialSampling ColorValueRef.grey ColorValueRef.png
 echo "color ref file sampled"
-echo""
+echo ""
