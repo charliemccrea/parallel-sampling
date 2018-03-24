@@ -9,10 +9,13 @@ import java.io.File;
 
 public class SequentialSampling
 {
-	public static final int RADIUS = 6;
-	public static final int MAX_FAILED_PTS = 100000;
-	/* DEBUG ATTRS */
+	/* Settings */
+  public static final int RADIUS = 6;
+	public static final double RATIO = 0.15;
+  /* DEBUG ATTRS */
 	public static final int MAX_ITERATIONS = Integer.MAX_VALUE; //100;
+  public static int hits = 0;
+  public static int misses = 0;
 
 	public static void main(String[] args)
 	{
@@ -64,18 +67,12 @@ public class SequentialSampling
 
 		startTime = System.currentTimeMillis();
 
-		while (failedPts < MAX_FAILED_PTS && itrs < MAX_ITERATIONS)
+		while (misses == 0 || ((hits/misses) > RATIO && itrs < MAX_ITERATIONS))
 		{
 			int x = (int) Math.floor(rand.nextDouble() * width);
 			int y = (int) Math.floor(rand.nextDouble() * height);
-			//System.out.print("Iter: "+ itrs +" "+ x + " "  + y + "\n");
 			Point pt = new Point(x, y);
-			if (darts.contains(pt))
-			{
-				//System.out.println("Point used already! " + failedPts);
-				failedPts++;
-			}
-			else
+			if (!darts.contains(pt))
 			{
 				boolean conflict = false;
 				for (int i = -2 * RADIUS; i < RADIUS*2 && !conflict; i++)
@@ -100,11 +97,14 @@ public class SequentialSampling
 
 				if (!conflict)
 				{
-          failedPts = 0;
-					//System.out.println("Added " + pt.getX() + " " + pt.getY());
+          hits++;
 					darts.add(pt);
 					pixels[x][y] = true;
-				}
+				} 
+        else
+        {
+          misses++;
+        }
 			}
 			itrs++;
 		}
