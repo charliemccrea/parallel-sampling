@@ -1,2 +1,4 @@
+#!/bin/bash
+
 echo "Opening in default browser, will run in background!"
-x-www-browser *.grey.html &
+find . -maxdepth 1 -type f -name "*.grey.html" -exec x-www-browser {} \;
