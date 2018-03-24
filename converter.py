@@ -23,7 +23,11 @@ def toText(filename):
     output.write("%d %d\n" % (width, height))
     for x in range(width):
         for y in range(height):
-            s = str(pixels[x,y][0])
+            s = ""
+            if type(pixels[x,y]) is list:
+                s = str(pixels[x,y][0])
+            elif type(pixels[x,y]) is int:
+                s = str(pixels[x,y])
             output.write(s + "\n")
     return;
 

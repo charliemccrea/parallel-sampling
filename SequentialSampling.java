@@ -9,7 +9,7 @@ import java.io.File;
 
 public class SequentialSampling
 {
-	public static final int RADIUS = 3;
+	public static final int RADIUS = 6;
 	public static final int MAX_FAILED_PTS = 100000;
 	/* DEBUG ATTRS */
 	public static final int MAX_ITERATIONS = Integer.MAX_VALUE; //100;
@@ -100,6 +100,7 @@ public class SequentialSampling
 
 				if (!conflict)
 				{
+          failedPts = 0;
 					//System.out.println("Added " + pt.getX() + " " + pt.getY());
 					darts.add(pt);
 					pixels[x][y] = true;
@@ -110,19 +111,20 @@ public class SequentialSampling
 
 		endTime = System.currentTimeMillis();
 
+		System.out.println("Done!");
 		System.out.println("Number of conflicts: " + numConflicts);
 		System.out.println("Creating SVG file...");
 
 		try
 		{
-			outSVG(width,height,darts,args[0], args[1]);
+			System.out.println("Using grey file: " + args[0] + " and picture file: " + args[1]);
+      outSVG(width,height,darts,args[0], args[1]);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 
-		System.out.println("Done");
 		System.out.println("Number of darts: " + darts.size());
 		System.out.println("Runtime: " + (endTime - startTime) + " ms");
 	}
@@ -131,22 +133,12 @@ public class SequentialSampling
 	{
 		// Add a circle tag for each successful point
 		// Output as an SVG file.
-		System.out.println("Picture background: " + picture);
 		StringBuilder str = new StringBuilder();
 		str.append(String.format("<html>\n<style>\n\tsvg {\n\t\tbackground-image: url(\"%s\");\n\t}\n</style>", picture));
     	str.append(String.format("<svg width=\"%d\" height=\"%d\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n", width, height));
-    	str.append(String.format("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"%d\" height=\"%d\">\n<image xlink:href=\"%s\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\"/>\n</pattern>\n</defs>\n", width, height, grey, width, height);
+    	str.append(String.format("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"%d\" height=\"%d\">\n<image xlink:href=\"%s\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\"/>\n</pattern>\n</defs>\n", width, height, grey, width, height));
     	str.append(String.format("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\"%d\" height=\"%d\"/>", width, height));
 
-    	//str.append("<html>\n<style> svg { background-image: url(\""+picture+"\"); }</style>");
-		//str.append("<svg width=\""+ width +"\" height=\""+height+"\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n");
-		//String file will be the filename of the picture to use in SVG file.
-		//str.append("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\""
-		//	+ width + "\" height=\"" + height + "\">\n<image xlink:href=\""
-		//	+ grey +"\" x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" +height+ "\"/>\n"
-		//	+ "</pattern>\n</defs>\n");
-		//str.append("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\""+width+"\" height=\""+height+"\"/>");
-		//str.append("<image x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\" xlink:href=\"" + file + "\"/>\n");
 		for (Point p : pts)
 		{
 			str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"1\" fill=\"none\" stroke=\"blue\" />\n");
@@ -157,6 +149,6 @@ public class SequentialSampling
 		BufferedWriter write = new BufferedWriter(new FileWriter(grey + ".html", false));
 		write.write(str.toString());
 		write.close();
-		System.err.println("Wrote new SVG");
+		//System.err.println("Wrote new SVG");
 	}
 }

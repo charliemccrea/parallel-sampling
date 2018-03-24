@@ -13,3 +13,9 @@ echo "=== TEST 3: Color References file ==="
 java SequentialSampling ColorValueRef.grey ColorValueRef.png
 echo "color ref file sampled"
 echo ""
+
+echo ""
+echo "=== TEST 4: Earth Image ==="
+java SequentialSampling earth.grey earth.jpg
+echo "Earth image file sampled"
+echo ""
