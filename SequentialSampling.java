@@ -12,6 +12,8 @@ public class SequentialSampling
 	/* Settings */
   public static final int RADIUS = 6;
 	public static final double RATIO = 0.15;
+  public static final String CIRCLE_COLOR = "red";
+
   /* DEBUG ATTRS */
 	public static final int MAX_ITERATIONS = Integer.MAX_VALUE; //100;
   public static int hits = 0;
@@ -141,7 +143,7 @@ public class SequentialSampling
 
 		for (Point p : pts)
 		{
-			str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"1\" fill=\"none\" stroke=\"blue\" />\n");
+			str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
 		}
 		str.append("</svg>\n</html>\n");
 
