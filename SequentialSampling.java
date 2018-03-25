@@ -11,7 +11,7 @@ public class SequentialSampling
 {
 	/* Settings */
   public static final int RADIUS = 6;
-	public static final double RATIO = 0.15;
+	public static final double RATIO = 0.1;
   public static final String CIRCLE_COLOR = "red";
 
   /* DEBUG ATTRS */
@@ -69,7 +69,7 @@ public class SequentialSampling
 
 		startTime = System.currentTimeMillis();
 
-		while (misses == 0 || ((hits/misses) > RATIO && itrs < MAX_ITERATIONS))
+		while (misses == 0 || (((double) hits/ (double)misses) > RATIO && itrs < MAX_ITERATIONS))
 		{
 			int x = (int) Math.floor(rand.nextDouble() * width);
 			int y = (int) Math.floor(rand.nextDouble() * height);
@@ -90,7 +90,7 @@ public class SequentialSampling
 								//System.err.println("Conflict!");
 								failedPts++;
 								conflict = true;
-								numConflicts++;
+								//numConflicts++;
 								//System.out.println("Failed point! " + failedPts);
 							}
 						}
@@ -114,7 +114,7 @@ public class SequentialSampling
 		endTime = System.currentTimeMillis();
 
 		System.out.println("Done!");
-		System.out.println("Number of conflicts: " + numConflicts);
+		System.out.println("Number of misses: " + misses);
 		System.out.println("Creating SVG file...");
 
 		try
