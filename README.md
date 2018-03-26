@@ -17,7 +17,7 @@ Other .png/.jpg files are the data set that we used for testing. The ColorValueR
 checking the results of the python script and will be useful in the anisotropic version.
 
 The python program requires Pillow import, make sure pip is updated. For Linux & MacOS:
-'$pip3 install pip' then '$pip3 install Pillow'. An image must be converted
+'pip3 install pip' then 'pip3 install Pillow'. An image must be converted
 to a .grey file before it may be used in the java program with the original file.
 
 SequentialSampling takes in the .grey and the .jpg/.png file in that order. It outputs a .grey.html file that can be opened in a web browser to show the distribution of the sampling darts.
