@@ -18,32 +18,13 @@ public class SequentialSampling
 	public static final int MAX_ITERATIONS = Integer.MAX_VALUE;
   public static int hits = 0;
   public static int misses = 0;
+  public static int width = 0;
+  public static int height = 0;
 
 	public static void main(String[] args)
 	{
-		if (args.length != 4)
-		{
-			System.out.println("java SequentialSampling <grey:file> <image:file> <radius:int> <ratio:double>");
-			return;
-		}
-
-    try {
-      RADIUS = Integer.parseInt(args[2]);
-    } catch(Exception ex) {
-      System.err.println("Failed to use given radius");
-      return;
-    }
-    
-    try {
-      RATIO = Double.parseDouble(args[3]); 
-    } catch(Exception ex) {
-      System.err.println("Failed to use given ratio");
-      return;
-    }
-
+    System.err.println("Errors in CLI? " + validCLI(args));
 		Scanner in;
-		int width = 0;
-		int height = 0;
 		String[] dim;
 		String dimStr;
 		long startTime;
@@ -82,8 +63,30 @@ public class SequentialSampling
 		int itrs = 0;
 
 		startTime = System.currentTimeMillis();
+    darts = sample(pixels, rand, failedPts, numConflicts, itrs);
+		endTime = System.currentTimeMillis();
 
-		while (misses == 0 || (((double) hits/ (double)misses) > RATIO && itrs < MAX_ITERATIONS))
+		System.out.println("Done!");
+		System.out.println("Number of misses: " + misses);
+		System.out.println("Creating SVG file...");
+
+		try
+		{
+			System.out.println("Using grey file: " + args[0] + " and picture file: " + args[1]);
+      outSVG(width,height,darts,args[0], args[1]);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
+		System.out.println("Number of darts: " + darts.size());
+		System.out.println("Runtime: " + (endTime - startTime) + " ms");
+	}
+
+  public static ArrayList<Point> sample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs) {
+    ArrayList<Point> darts = new ArrayList<>();
+    while (misses == 0 || (((double) hits/ (double)misses) > RATIO && itrs < MAX_ITERATIONS))
 		{
 			int x = (int) Math.floor(rand.nextDouble() * width);
 			int y = (int) Math.floor(rand.nextDouble() * height);
@@ -124,26 +127,33 @@ public class SequentialSampling
 			}
 			itrs++;
 		}
+    return darts;
+  }
 
-		endTime = System.currentTimeMillis();
+  public static boolean validCLI(String[] args) {
+		boolean valid = true;
+    RADIUS = 5;
+    RATIO = 0.25;
 
-		System.out.println("Done!");
-		System.out.println("Number of misses: " + misses);
-		System.out.println("Creating SVG file...");
-
-		try
+    if (args.length != 4)
 		{
-			System.out.println("Using grey file: " + args[0] + " and picture file: " + args[1]);
-      outSVG(width,height,darts,args[0], args[1]);
+			System.out.println("java SequentialSampling <grey:file> <image:file> <radius:int> <ratio:double>");
+			return false;
 		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-
-		System.out.println("Number of darts: " + darts.size());
-		System.out.println("Runtime: " + (endTime - startTime) + " ms");
-	}
+    try {
+      RADIUS = Integer.parseInt(args[2]);
+    } catch(Exception ex) {
+      System.err.println("Failed to use given radius, using default 5.");
+      valid = false;
+    }
+    try {
+      RATIO = Double.parseDouble(args[3]); 
+    } catch(Exception ex) {
+      System.err.println("Failed to use given ratio, using default 0.25.");
+      valid = false;
+    }
+    return valid;
+  }
 
 	public static void outSVG(int width, int height, ArrayList<Point> pts, String grey, String picture) throws IOException
 	{
