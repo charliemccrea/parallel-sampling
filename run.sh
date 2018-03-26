@@ -1,3 +1,4 @@
+make
 echo "=== TEST 1: Puppy greyscale file ==="
 java SequentialSampling tests/puppy.grey puppy.jpg 6 0.05
 echo "Puppy file sampled"
