@@ -10,22 +10,36 @@ import java.io.File;
 public class SequentialSampling
 {
 	/* Settings */
-  public static final int RADIUS = 6;
-	public static final double RATIO = 0.1;
+  public static int RADIUS = 6;
+	public static double RATIO = 0.1;
   public static final String CIRCLE_COLOR = "red";
 
   /* DEBUG ATTRS */
-	public static final int MAX_ITERATIONS = Integer.MAX_VALUE; //100;
+	public static final int MAX_ITERATIONS = Integer.MAX_VALUE;
   public static int hits = 0;
   public static int misses = 0;
 
 	public static void main(String[] args)
 	{
-		if (args.length != 2)
+		if (args.length != 4)
 		{
-			System.out.println("Enter a .grey file name and the picture!");
+			System.out.println("java SequentialSampling <grey:file> <image:file> <radius:int> <ratio:double>");
 			return;
 		}
+
+    try {
+      RADIUS = Integer.parseInt(args[2]);
+    } catch(Exception ex) {
+      System.err.println("Failed to use given radius");
+      return;
+    }
+    
+    try {
+      RATIO = Double.parseDouble(args[3]); 
+    } catch(Exception ex) {
+      System.err.println("Failed to use given ratio");
+      return;
+    }
 
 		Scanner in;
 		int width = 0;
@@ -77,9 +91,9 @@ public class SequentialSampling
 			if (!darts.contains(pt))
 			{
 				boolean conflict = false;
-				for (int i = -2 * RADIUS; i < RADIUS*2 && !conflict; i++)
+				for (int i = -2*RADIUS; i < RADIUS*2 && !conflict; i++)
 				{
-					for (int j = -2 * RADIUS; j < RADIUS*2 && !conflict; j++)
+					for (int j = -2*RADIUS; j < RADIUS*2 && !conflict; j++)
 					{
 						int a = i + x;
 						int b = j + y;
