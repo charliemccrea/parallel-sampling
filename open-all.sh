@@ -1,2 +1,2 @@
 #!/bin/bash
-find . -maxdepth 1 -type f -name "*.grey.html" -exec x-www-browser {} \; 2>/dev/null
+find tests/ -maxdepth 1 -type f -name "*.grey.html" -exec bash -c 'x-www-browser {} &' \; 2>/dev/null
