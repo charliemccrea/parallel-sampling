@@ -1,0 +1,44 @@
+=== TEST 1: Puppy greyscale file ===
+WxH = 332 300
+Done!
+Number of misses: 7320
+Creating SVG file...
+Using grey file: tests/puppy.grey and picture file: puppy.jpg
+Number of darts: 366
+Runtime: 57 ms
+Puppy file sampled
+
+=== TEST 2: Grey Bars file ===
+WxH = 900 600
+Done!
+Number of misses: 38140
+Creating SVG file...
+Using grey file: tests/bars.grey and picture file: bars.jpg
+Number of darts: 1907
+Runtime: 232 ms
+
+=== TEST 3: Earth Image ===
+WxH = 8192 4096
+Done!
+Number of misses: 134016
+Creating SVG file...
+Using grey file: tests/earth.grey and picture file: earth.jpg
+Number of darts: 33504
+Runtime: 7517 ms
+Sampled at a ratio of 0.25
+WxH = 8192 4096
+Done!
+Number of misses: 245860
+Creating SVG file...
+Using grey file: tests/earth.grey and picture file: earth.jpg
+Number of darts: 36879
+Runtime: 15107 ms
+Sampled at a ratio of 0.15
+WxH = 8192 4096
+Done!
+Number of misses: 837260
+Creating SVG file...
+Using grey file: tests/earth.grey and picture file: earth.jpg
+Number of darts: 41863
+Runtime: 60741 ms
+Sampled at a ratio of 0.05
