@@ -11,6 +11,8 @@ The next step is compiling the Java program SequentialSampling with the makefile
 Once you have a file in .grey and .png format, you may use the Java SequentialSampling program.
 'java SequentialSampling puppy.grey puppy.jpg' runs it on a single source image.
 
+You can also run the testing script ./run.sh to run multiple tests at once.
+
 The .grey.html images can be viewed in any web browser that supports svg.
 
 Other .png/.jpg files are the data set that we used for testing. The ColorValueRef was used for
