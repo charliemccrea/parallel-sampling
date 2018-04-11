@@ -13,7 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.File;
 
-public class SequentialSampling
+public class AnisotropicSerial
 {
 	/* Settings */
   //public static int RADIUS = 6;
@@ -35,7 +35,6 @@ public class SequentialSampling
 		String dimStr;
 		long startTime;
 		long endTime;
-		int [][] rgbValues;
 
 		try
 		{
@@ -208,4 +207,14 @@ public class SequentialSampling
 		write.close();
 		//System.err.println("Wrote new SVG");
 	}
+}
+
+private class Dart
+{
+	public static int rgb;
+	public static int radius;
+	public static int width;
+	public static int height;
+
+
 }
