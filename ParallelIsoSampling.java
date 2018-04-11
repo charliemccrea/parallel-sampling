@@ -13,6 +13,7 @@ public class ParallelIsoSampling
   public static int RADIUS = 6;
 	public static double RATIO = 0.1;
   public static final String CIRCLE_COLOR = "red";
+  public static int THREAD_SIZE = 4;
 
   /* DEBUG ATTRS */
 	public static final int MAX_ITERATIONS = Integer.MAX_VALUE;
@@ -62,8 +63,13 @@ public class ParallelIsoSampling
 		int itrs = 0;
 
 		startTime = System.currentTimeMillis();
-    darts = sample(pixels, rand, failedPts, numConflicts, itrs);
-		endTime = System.currentTimeMillis();
+    darts = serialSample(pixels, rand, failedPts, numConflicts, itrs);
+		Sampling s = new Sampling();
+    
+    for (int i = 0; i < THREAD_SIZE; i++) {
+      s.start();
+    }
+    endTime = System.currentTimeMillis();
 
 		try
 		{
@@ -75,7 +81,7 @@ public class ParallelIsoSampling
 		}
 	}
 
-  public static ArrayList<Point> sample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs) {
+  public static ArrayList<Point> serialSample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs) {
     ArrayList<Point> darts = new ArrayList<>();
     while (misses == 0 || (((double) hits/ (double)misses) > RATIO && itrs < MAX_ITERATIONS))
 		{
@@ -162,10 +168,58 @@ public class ParallelIsoSampling
 		}
 		str.append("</svg>\n</html>\n");
 
-		//Write str.toString() to file, open in browser
 		BufferedWriter write = new BufferedWriter(new FileWriter(grey + ".html", false));
 		write.write(str.toString());
 		write.close();
-		//System.err.println("Wrote new SVG");
 	}
+
+  class Sampling extends Thread 
+  {
+
+    public synchronized boolean isConflict(int x, int y, boolean[][] pixels)
+    {
+      boolean conflict = false;  
+      for (int i = -2*RADIUS; i < RADIUS*2 && !conflict; i++)
+      {
+        for (int j = -2*RADIUS; j < RADIUS*2 && !conflict; j++)
+        {
+          int a = i + x;
+          int b = j + y;
+          if (a >= 0 && a < width && b >= 0 && b < height)
+          {
+            if (pixels[a][b])
+            {
+              conflict = true;
+            }
+          }
+        }
+      }
+      this.addPoint(x,y,pixels);
+      return conflict;
+    }
+
+    public synchronized void addPoint(int x, int y, boolean[][] pixels)
+    {
+      pixels[x][y] = true;
+    }
+
+    public ArrayList<Point> sample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs) {
+      int hits = 0, misses = 0;
+      ArrayList<Point> darts = new ArrayList<>();
+      while (misses == 0 || (((double) hits/ (double)misses) > RATIO && itrs < MAX_ITERATIONS))
+      {
+        int x = (int) Math.floor(rand.nextDouble() * width);
+        int y = (int) Math.floor(rand.nextDouble() * height);
+        Point pt = new Point(x, y);
+        if (!darts.contains(pt))
+        {
+          boolean conflict = isConflict(x,y,pixels);
+          if (!conflict) hits++; else misses++;
+        }
+        itrs++;
+      }
+
+      return darts;
+    }
+  }
 }

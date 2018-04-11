@@ -1,4 +1,4 @@
 all:
-	javac SequentialSampling.java && gcc -o serial_sampling serial_sampling.c
+	javac SequentialSampling.java ParallelIsoSampling.java
 clean:
-	rm -f SequentialSampling.class tests/*.grey.html
+	rm -f ParallelIsoSampling.class SequentialSampling.class tests/*.grey.html
