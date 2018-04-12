@@ -113,7 +113,7 @@ public class AnisotropicSerial
 				int rad = pt.getRadius();
 				for (int i = -2*RADIUS; i < RADIUS*2 && !conflict; i++)
 				{
-					for (int j = -2*RADIUS; j < RADIUS*2 && !conflict; j++)
+					for (int j = -2*rad; j < rad*2 && !conflict; j++)
 					{
 						int a = i + x;
 						int b = j + y;
@@ -181,9 +181,9 @@ public class AnisotropicSerial
     	str.append(String.format("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"%d\" height=\"%d\">\n<image xlink:href=\"%s\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\"/>\n</pattern>\n</defs>\n", width, height, grey, width, height));
     	str.append(String.format("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\"%d\" height=\"%d\"/>", width, height));
 
-		for (Dart p : pts)
+		for (Dart d : pts)
 		{
-			str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + p.getRadius() + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
+			str.append("<circle cx=\"" + d.getX() + "\" cy=\"" + d.getY() +"\" r=\"" + d.getRadius() + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
 		}
 		str.append("</svg>\n</html>\n");
 
@@ -202,7 +202,6 @@ class Dart
   public int radius;
   public int x;
   public int y;
-
 
   public Dart(int x, int y){
     this.y = y;
