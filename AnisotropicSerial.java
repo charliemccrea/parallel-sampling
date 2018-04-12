@@ -73,13 +73,13 @@ public class AnisotropicSerial
 			}
 		}
 
-		ArrayList<Point> darts = new ArrayList<Point>();
+		ArrayList<Dart> darts = new ArrayList<>();
 		int failedPts = 0;
 		int numConflicts = 0;
 		int itrs = 0;
 
 		startTime = System.currentTimeMillis();
-    	darts = sample(pixels, rand, failedPts, numConflicts, itrs);
+    darts = sample(pixels, rand, failedPts, numConflicts, itrs);
 		endTime = System.currentTimeMillis();
 
 		System.out.println("Done!");
@@ -110,7 +110,7 @@ public class AnisotropicSerial
 			if (!darts.contains(pt))
 			{
 				boolean conflict = false;
-				int rad = pt.getRadius;
+				int rad = pt.getRadius();
 				for (int i = -2*RADIUS; i < RADIUS*2 && !conflict; i++)
 				{
 					for (int j = -2*RADIUS; j < RADIUS*2 && !conflict; j++)
@@ -171,7 +171,7 @@ public class AnisotropicSerial
     return valid;
   	}
 
-	public static void outSVG(int width, int height, ArrayList<Point> pts, String grey, String picture) throws IOException
+	public static void outSVG(int width, int height, ArrayList<Dart> pts, String grey, String picture) throws IOException
 	{
 		// Add a circle tag for each successful point
 		// Output as an SVG file.
@@ -181,9 +181,9 @@ public class AnisotropicSerial
     	str.append(String.format("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"%d\" height=\"%d\">\n<image xlink:href=\"%s\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\"/>\n</pattern>\n</defs>\n", width, height, grey, width, height));
     	str.append(String.format("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\"%d\" height=\"%d\"/>", width, height));
 
-		for (Point p : pts)
+		for (Dart p : pts)
 		{
-			str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
+			str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + p.getRadius() + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
 		}
 		str.append("</svg>\n</html>\n");
 
@@ -194,49 +194,59 @@ public class AnisotropicSerial
 		//System.err.println("Wrote new SVG");
 	}
 
-	private class Dart
-	{
-		public int rgb;
-		public int radius;
-		public int width;
-		public int height;
+}
+
+class Dart
+{
+  public int rgb;
+  public int radius;
+  public int x;
+  public int y;
 
 
-		private Dart(int w, int h){
-			height = h;
-			width = w;
-			setRadius();
-			setRGB();
-		}
+  public Dart(int x, int y){
+    this.y = y;
+    this.x = x;
+    setRadius();
+    setRGB();
+  }
 
-		private void setRGB(){
-			rgb = AnisotropicSerial.rgbValues[width][height];
-		}
+  private void setRGB(){
+    rgb = AnisotropicSerial.rgbValues[x][y];
+  }
 
-		private void setRadius(){
-  			if(rgb <= 255 && rgb > 208){
-  				radius = 10;
-  			}
-  			else if(rgb <= 208 && rgb > 160){
-  				radius = 8;
-  			}
-  			else if(rgb <=160 && rgb > 112){
-  				radius = 6;
-  			}
-  			else if (rgb <= 112 && rgb > 64){
-  				radius = 4;
-  			}
-  			else if (rgb <= 64 && rgb > 24){
-  				radius = 2;
-  			}
-  			else{
-  				radius = 1;
-  			}
-  		}
+  private void setRadius(){
+    if(rgb <= 255 && rgb > 208){
+      radius = 10;
+    }
+    else if(rgb <= 208 && rgb > 160){
+      radius = 8;
+    }
+    else if(rgb <=160 && rgb > 112){
+      radius = 6;
+    }
+    else if (rgb <= 112 && rgb > 64){
+      radius = 4;
+    }
+    else if (rgb <= 64 && rgb > 24){
+      radius = 2;
+    }
+    else{
+      radius = 1;
+    }
+  }
 
-	  	public int getRadius(){
-  			return radius;
-  		}
+  public int getRadius(){
+    return radius;
+  }
 
-	}
+  public int getX() 
+  {
+    return this.x;
+  }
+
+  public int getY()
+  {
+    return this.y;
+  }
 }
