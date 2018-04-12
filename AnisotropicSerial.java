@@ -51,7 +51,7 @@ public class AnisotropicSerial
 			{
 				for (int j = 0; j < height; j++)
 				{
-					rgbValues[i][j] = Integer.parseInt(in.nextLine().trim());
+					rgbValues[i][j] = in.nextInt();
 				}
 			}
 		}
@@ -164,15 +164,15 @@ public class AnisotropicSerial
 		boolean valid = true;
 		RATIO = 0.25;
 
-		if (args.length != 4)
+		if (args.length != 3)
 		{
-			System.out.println("java AnisotropicSerial <grey:file> <image:file> <radius:int> <ratio:double>");
+			System.out.println("java AnisotropicSerial <grey:file> <image:file> <ratio:double>");
 			return false;
 		}
 
 		try
 		{
-			RATIO = Double.parseDouble(args[3]);
+			RATIO = Double.parseDouble(args[2]);
 		}
 		catch(Exception ex)
 		{
@@ -218,7 +218,7 @@ public class AnisotropicSerial
 			this.x = width;
 			this.y = height;
 			this.value = value;
-      setRadius();
+      		setRadius();
 		}
 
 		public void setRadius()
@@ -229,12 +229,12 @@ public class AnisotropicSerial
   			else if (value >  64 && value <= 112) radius =  4;
   			else if (value >  24 && value <=  64) radius =  2;
   			else                                  radius =  1;
-  	}
+  		}
 
-    public int getRadius() { return radius; }
+    	public int getRadius() { return radius; }
 
-    public int getX()      { return x; }
+    	public int getX()      { return x; }
 
-    public int getY()      { return y; }
+    	public int getY()      { return y; }
 	}
 }
