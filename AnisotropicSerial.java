@@ -16,7 +16,6 @@ import java.io.File;
 public class AnisotropicSerial
 {
 	/* Settings */
-	public static int RADIUS = 6;
 	public static double RATIO = 0.1;
 	public static final String CIRCLE_COLOR = "red";
 
@@ -163,23 +162,12 @@ public class AnisotropicSerial
 	public static boolean validCLI(String[] args)
 	{
 		boolean valid = true;
-		RADIUS = 5;
 		RATIO = 0.25;
 
 		if (args.length != 4)
 		{
 			System.out.println("java AnisotropicSerial <grey:file> <image:file> <radius:int> <ratio:double>");
 			return false;
-		}
-
-		try
-		{
-			RADIUS = Integer.parseInt(args[2]);
-		}
-		catch(Exception ex)
-		{
-			System.err.println("Failed to use given radius, using default 5.");
-			valid = false;
 		}
 
 		try
@@ -218,7 +206,7 @@ public class AnisotropicSerial
 		//System.err.println("Wrote new SVG");
 	}
 
-	public class Dart
+	public static class Dart
 	{
 		private int x;
 		private int y;
