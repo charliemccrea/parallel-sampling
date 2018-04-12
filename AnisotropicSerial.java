@@ -73,13 +73,13 @@ public class AnisotropicSerial
 			}
 		}
 
-		ArrayList<Dart> darts = new ArrayList<>();
+		ArrayList<Dart> darts = new ArrayList<Dart>();
 		int failedPts = 0;
 		int numConflicts = 0;
 		int itrs = 0;
 
 		startTime = System.currentTimeMillis();
-    darts = sample(pixels, rand, failedPts, numConflicts, itrs);
+    	darts = sample(pixels, rand, failedPts, numConflicts, itrs);
 		endTime = System.currentTimeMillis();
 
 		System.out.println("Done!");
@@ -111,7 +111,7 @@ public class AnisotropicSerial
 			{
 				boolean conflict = false;
 				int rad = pt.getRadius();
-				for (int i = -2*RADIUS; i < RADIUS*2 && !conflict; i++)
+				for (int i = -2*rad; i < rad*2 && !conflict; i++)
 				{
 					for (int j = -2*rad; j < rad*2 && !conflict; j++)
 					{
@@ -133,6 +133,18 @@ public class AnisotropicSerial
           			hits++;
 					darts.add(pt);
 					pixels[x][y] = true;
+					for (int i = -2*rad; i < rad*2 && !conflict; i++)
+					{
+						for (int j = -2*rad; j < rad*2 && !conflict; j++)
+						{
+							int a = i + x;
+							int b = j + y;
+							if (a >= 0 && a < width && b >= 0 && b < height)
+							{
+								pixels[a][b] = true;
+							}
+						}
+					}
 				} 
         		else
         		{
@@ -194,58 +206,57 @@ public class AnisotropicSerial
 		//System.err.println("Wrote new SVG");
 	}
 
-}
+	private class Dart
+	{
+		public int rgb;
+		public int radius;
+		public int width;
+		public int height;
 
-class Dart
-{
-  public int rgb;
-  public int radius;
-  public int x;
-  public int y;
 
-  public Dart(int x, int y){
-    this.y = y;
-    this.x = x;
-    setRadius();
-    setRGB();
-  }
+		public Dart(int w, int h){
+			height = h;
+			width = w;
+			setRadius();
+			setRGB();
+		}
 
-  private void setRGB(){
-    rgb = AnisotropicSerial.rgbValues[x][y];
-  }
+		private void setRGB(){
+			rgb = AnisotropicSerial.rgbValues[width][height];
+		}
 
-  private void setRadius(){
-    if(rgb <= 255 && rgb > 208){
-      radius = 10;
-    }
-    else if(rgb <= 208 && rgb > 160){
-      radius = 8;
-    }
-    else if(rgb <=160 && rgb > 112){
-      radius = 6;
-    }
-    else if (rgb <= 112 && rgb > 64){
-      radius = 4;
-    }
-    else if (rgb <= 64 && rgb > 24){
-      radius = 2;
-    }
-    else{
-      radius = 1;
-    }
-  }
+		private void setRadius(){
+  			if(rgb <= 255 && rgb > 208){
+  				radius = 10;
+  			}
+  			else if(rgb <= 208 && rgb > 160){
+  				radius = 8;
+  			}
+  			else if(rgb <=160 && rgb > 112){
+  				radius = 6;
+  			}
+  			else if (rgb <= 112 && rgb > 64){
+  				radius = 4;
+  			}
+  			else if (rgb <= 64 && rgb > 24){
+  				radius = 2;
+  			}
+  			else{
+  				radius = 1;
+  			}
+  		}
 
-  public int getRadius(){
-    return radius;
-  }
+	  	public int getRadius(){
+  			return radius;
+  		}
 
-  public int getX() 
-  {
-    return this.x;
-  }
+  		public int getX(){
+  			return width;
+  		}
 
-  public int getY()
-  {
-    return this.y;
-  }
+  		public int getY(){
+  			return height;
+  		}
+
+	}
 }
