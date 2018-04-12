@@ -79,7 +79,7 @@ public class AnisotropicSerial
 		int itrs = 0;
 
 		startTime = System.currentTimeMillis();
-		darts = sample(pixels, rand, failedPts, numConflicts, itrs);
+		darts = sample(pixels, rand, failedPts, numConflicts, itrs, rgbValues);
 		endTime = System.currentTimeMillis();
 
 		System.out.println("Done!");
@@ -100,7 +100,7 @@ public class AnisotropicSerial
 		System.out.println("Runtime: " + (endTime - startTime) + " ms");
 	}
 
-	public static ArrayList<Dart> sample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs)
+	public static ArrayList<Dart> sample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs, int[][] rgbValues)
 	{
 		ArrayList<Dart> darts = new ArrayList<>();
 
@@ -108,7 +108,7 @@ public class AnisotropicSerial
 		{
 			int x = (int) Math.floor(rand.nextDouble() * width);
 			int y = (int) Math.floor(rand.nextDouble() * height);
-			Dart pt = new Dart(x, y);
+			Dart pt = new Dart(x, y, rgbValues[x][y]);
 
 			if (!darts.contains(pt))
 			{
@@ -213,15 +213,13 @@ public class AnisotropicSerial
 		private int value;
 		private int radius;
 
-		public Dart(int width, int height)
+		public Dart(int width, int height, int value)
 		{
-			x = width;
-			y = height;
-			setValue();
-			setRadius();
+			this.x = width;
+			this.y = height;
+			this.value = value;
+      setRadius();
 		}
-
-		public void setValue() { value = AnisotropicSerial.rgbValues[x][y]; }
 
 		public void setRadius()
 		{
@@ -231,12 +229,12 @@ public class AnisotropicSerial
   			else if (value >  64 && value <= 112) radius =  4;
   			else if (value >  24 && value <=  64) radius =  2;
   			else                                  radius =  1;
-  		}
+  	}
 
-	  	public int getRadius() { return radius; }
+    public int getRadius() { return radius; }
 
-  		public int getX()      { return x; }
+    public int getX()      { return x; }
 
-  		public int getY()      { return y; }
+    public int getY()      { return y; }
 	}
 }
