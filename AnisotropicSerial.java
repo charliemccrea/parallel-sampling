@@ -233,10 +233,7 @@ public class AnisotropicSerial
 			setRadius();
 		}
 
-		public void setValue()
-		{
-			value = AnisotropicSerial.rgbValues[x][y];
-		}
+		public void setValue() { value = AnisotropicSerial.rgbValues[x][y]; }
 
 		public void setRadius()
 		{
