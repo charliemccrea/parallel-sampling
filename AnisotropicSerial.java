@@ -73,7 +73,7 @@ public class AnisotropicSerial
 			}
 		}
 
-		ArrayList<Point> darts = new ArrayList<Point>();
+		ArrayList<Dart> darts = new ArrayList<Dart>();
 		int failedPts = 0;
 		int numConflicts = 0;
 		int itrs = 0;
@@ -110,10 +110,10 @@ public class AnisotropicSerial
 			if (!darts.contains(pt))
 			{
 				boolean conflict = false;
-				int rad = pt.getRadius;
-				for (int i = -2*RADIUS; i < RADIUS*2 && !conflict; i++)
+				int rad = pt.getRadius();
+				for (int i = -2*rad; i < rad*2 && !conflict; i++)
 				{
-					for (int j = -2*RADIUS; j < RADIUS*2 && !conflict; j++)
+					for (int j = -2*rad; j < rad*2 && !conflict; j++)
 					{
 						int a = i + x;
 						int b = j + y;
@@ -171,7 +171,7 @@ public class AnisotropicSerial
     return valid;
   	}
 
-	public static void outSVG(int width, int height, ArrayList<Point> pts, String grey, String picture) throws IOException
+	public static void outSVG(int width, int height, ArrayList<Dart> pts, String grey, String picture) throws IOException
 	{
 		// Add a circle tag for each successful point
 		// Output as an SVG file.
@@ -181,9 +181,9 @@ public class AnisotropicSerial
     	str.append(String.format("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"%d\" height=\"%d\">\n<image xlink:href=\"%s\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\"/>\n</pattern>\n</defs>\n", width, height, grey, width, height));
     	str.append(String.format("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\"%d\" height=\"%d\"/>", width, height));
 
-		for (Point p : pts)
+		for (Dart d : pts)
 		{
-			str.append("<circle cx=\"" + p.getX() + "\" cy=\"" + p.getY() +"\" r=\"" + RADIUS + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
+			str.append("<circle cx=\"" + d.getX() + "\" cy=\"" + d.getY() +"\" r=\"" + d.getRadius() + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
 		}
 		str.append("</svg>\n</html>\n");
 
@@ -202,7 +202,7 @@ public class AnisotropicSerial
 		public int height;
 
 
-		private Dart(int w, int h){
+		public Dart(int w, int h){
 			height = h;
 			width = w;
 			setRadius();
@@ -236,6 +236,14 @@ public class AnisotropicSerial
 
 	  	public int getRadius(){
   			return radius;
+  		}
+
+  		public int getX(){
+  			return width;
+  		}
+
+  		public int getY(){
+  			return height;
   		}
 
 	}
