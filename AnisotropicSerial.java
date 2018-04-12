@@ -218,68 +218,40 @@ public class AnisotropicSerial
 		//System.err.println("Wrote new SVG");
 	}
 
-	private class Dart
+	public class Dart
 	{
-		public int rgb;
-		public int radius;
-		public int width;
-		public int height;
+		private int x;
+		private int y;
+		private int value;
+		private int radius;
 
-
-		public Dart(int w, int h)
+		public Dart(int width, int height)
 		{
-			height = h;
-			width = w;
+			x = width;
+			y = height;
+			setValue();
 			setRadius();
-			setRGB();
 		}
 
-		private void setRGB()
+		public void setValue()
 		{
-			rgb = AnisotropicSerial.rgbValues[width][height];
+			value = AnisotropicSerial.rgbValues[x][y];
 		}
 
-		private void setRadius()
+		public void setRadius()
 		{
-  			if(rgb <= 255 && rgb > 208)
-			{
-  				radius = 10;
-  			}
-  			else if(rgb <= 208 && rgb > 160)
-			{
-  				radius = 8;
-  			}
-  			else if(rgb <=160 && rgb > 112)
-			{
-  				radius = 6;
-  			}
-  			else if (rgb <= 112 && rgb > 64)
-			{
-  				radius = 4;
-  			}
-  			else if (rgb <= 64 && rgb > 24)
-			{
-  				radius = 2;
-  			}
-  			else
-			{
-  				radius = 1;
-  			}
+  			if      (value > 208 && value <= 255) radius = 10;
+  			else if (value > 160 && value <= 208) radius =  8;
+  			else if (value > 112 && value <= 160) radius =  6;
+  			else if (value >  64 && value <= 112) radius =  4;
+  			else if (value >  24 && value <=  64) radius =  2;
+  			else                                  radius =  1;
   		}
 
-	  	public int getRadius()
-		{
-  			return radius;
-  		}
+	  	public int getRadius() { return radius; }
 
-  		public int getX()
-		{
-  			return width;
-  		}
+  		public int getX()      { return x; }
 
-  		public int getY()
-		{
-  			return height;
-  		}
+  		public int getY()      { return y; }
 	}
 }
