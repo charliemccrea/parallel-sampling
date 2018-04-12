@@ -51,7 +51,7 @@ public class AnisotropicSerial
 			{
 				for (int j = 0; j < height; j++)
 				{
-					rgbValues[i][j] = Integer.parseInt(in.nextLine());
+					rgbValues[i][j] = Integer.parseInt(in.nextLine().trim());
 				}
 			}
 		}
