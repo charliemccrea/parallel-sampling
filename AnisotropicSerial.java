@@ -1,6 +1,6 @@
 /*********
 * CS 470 
-* Serial Isotropic Sampling 
+* Serial Anisotropic Sampling 
 * Georgia Corey, Sam Kiwus, Charlie McCrea, and Jason Zareski
 **********/
 
@@ -16,7 +16,7 @@ import java.io.File;
 public class AnisotropicSerial
 {
 	/* Settings */
-  //public static int RADIUS = 6;
+  public static int RADIUS = 6;
   public static double RATIO = 0.1;
   public static final String CIRCLE_COLOR = "red";
 
@@ -26,6 +26,7 @@ public class AnisotropicSerial
   public static int misses = 0;
   public static int width = 0;
   public static int height = 0;
+  public static int [][] rgbValues;
 
 	public static void main(String[] args)
 	{
@@ -35,6 +36,7 @@ public class AnisotropicSerial
 		String dimStr;
 		long startTime;
 		long endTime;
+		int [][] rgbValues;
 
 		try
 		{
@@ -44,6 +46,14 @@ public class AnisotropicSerial
 			dim    = dimStr.split(" ");
 			width  = Integer.parseInt(dim[0]);
 			height = Integer.parseInt(dim[1]);
+			rgbValues = new int[width][height];
+			for (int i = 0; i < width; i++)
+			{
+				for (int j = 0; j < height; j++)
+				{
+					rgbValues[i][j] = Integer.parseInt(in.nextLine());
+				}
+			}
 		}
 		catch (IOException e)
 		{
@@ -90,16 +100,17 @@ public class AnisotropicSerial
 		System.out.println("Runtime: " + (endTime - startTime) + " ms");
 	}
 
-  public static ArrayList<Point> sample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs) {
-    ArrayList<Point> darts = new ArrayList<>();
+  public static ArrayList<Dart> sample(boolean[][] pixels, Random rand, int failedPts, int numConflicts, int itrs) {
+    ArrayList<Dart> darts = new ArrayList<>();
     while (misses == 0 || (((double) hits/ (double)misses) > RATIO && itrs < MAX_ITERATIONS))
 		{
 			int x = (int) Math.floor(rand.nextDouble() * width);
 			int y = (int) Math.floor(rand.nextDouble() * height);
-			Point pt = new Point(x, y);
+			Dart pt = new Dart(x, y);
 			if (!darts.contains(pt))
 			{
 				boolean conflict = false;
+				int rad = pt.getRadius;
 				for (int i = -2*RADIUS; i < RADIUS*2 && !conflict; i++)
 				{
 					for (int j = -2*RADIUS; j < RADIUS*2 && !conflict; j++)
@@ -133,31 +144,6 @@ public class AnisotropicSerial
     return darts;
   }
 
-  public static int getRadius(int rgb){
-  	int radius;
-  	if(rgb <= 255 && rgb > 208){
-  		radius = 10;
-  	}
-  	else if(rgb <= 208 && rgb > 160){
-  		radius = 8;
-  	}
-  	else if(rgb <=160 && rgb > 112){
-  		radius = 6;
-  	}
-  	else if (rgb <= 112 && rgb > 64){
-  		radius = 4;
-  	}
-  	else if (rgb <= 64 && rgb > 24){
-  		radius = 2;
-  	}
-  	else{
-  		radius = 1;
-  	}
-
-  	return radius;
-
-  }
-
   public static boolean validCLI(String[] args) {
 		boolean valid = true;
     RADIUS = 5;
@@ -165,7 +151,7 @@ public class AnisotropicSerial
 
     if (args.length != 4)
 		{
-			System.out.println("java SequentialSampling <grey:file> <image:file> <radius:int> <ratio:double>");
+			System.out.println("java AnisotropicSerial <grey:file> <image:file> <radius:int> <ratio:double>");
 			return false;
 		}
     try {
@@ -183,7 +169,7 @@ public class AnisotropicSerial
       valid = false;
     }
     return valid;
-  }
+  	}
 
 	public static void outSVG(int width, int height, ArrayList<Point> pts, String grey, String picture) throws IOException
 	{
@@ -207,14 +193,50 @@ public class AnisotropicSerial
 		write.close();
 		//System.err.println("Wrote new SVG");
 	}
-}
 
-private class Dart
-{
-	public static int rgb;
-	public static int radius;
-	public static int width;
-	public static int height;
+	private class Dart
+	{
+		public int rgb;
+		public int radius;
+		public int width;
+		public int height;
 
 
+		private Dart(int w, int h){
+			height = h;
+			width = w;
+			setRadius();
+			setRGB();
+		}
+
+		private void setRGB(){
+			rgb = AnisotropicSerial.rgbValues[width][height];
+		}
+
+		private void setRadius(){
+  			if(rgb <= 255 && rgb > 208){
+  				radius = 10;
+  			}
+  			else if(rgb <= 208 && rgb > 160){
+  				radius = 8;
+  			}
+  			else if(rgb <=160 && rgb > 112){
+  				radius = 6;
+  			}
+  			else if (rgb <= 112 && rgb > 64){
+  				radius = 4;
+  			}
+  			else if (rgb <= 64 && rgb > 24){
+  				radius = 2;
+  			}
+  			else{
+  				radius = 1;
+  			}
+  		}
+
+	  	public int getRadius(){
+  			return radius;
+  		}
+
+	}
 }
