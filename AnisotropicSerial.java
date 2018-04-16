@@ -192,16 +192,17 @@ public class AnisotropicSerial
 		str.append(String.format("<svg width=\"%d\" height=\"%d\" version=\"1.1\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns=\"http://www.w3.org/2000/svg\">\n", width, height));
 		str.append(String.format("<defs>\n<pattern id=\"bg_img\" patternUnits=\"userSpaceOnUse\" width=\"%d\" height=\"%d\">\n<image xlink:href=\"%s\" x=\"0\" y=\"0\" width=\"%d\" height=\"%d\"/>\n</pattern>\n</defs>\n", width, height, grey, width, height));
 		str.append(String.format("<path fill=\"url(#bg_img)\" x=\"0\" y=\"0\" stroke=\"black\" width=\"%d\" height=\"%d\"/>", width, height));
+		BufferedWriter write = new BufferedWriter(new FileWriter(grey + ".html", false));
+		write.write(str.toString());
 
 		for (Dart d : pts)
 		{
-			str.append("<circle cx=\"" + d.getX() + "\" cy=\"" + d.getY() +"\" r=\"" + d.getRadius() + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
+			write.write("<circle cx=\"" + d.getX() + "\" cy=\"" + d.getY() +"\" r=\"" + d.getRadius() + "\" stroke-width=\"1\" fill=\"none\" stroke=\""+CIRCLE_COLOR+"\" />\n");
+            write.flush();
 		}
-		str.append("</svg>\n</html>\n");
+		write.write("</svg>\n</html>\n");
 
 		//Write str.toString() to file, open in browser
-		BufferedWriter write = new BufferedWriter(new FileWriter(grey + ".html", false));
-		write.write(str.toString());
 		write.close();
 		//System.err.println("Wrote new SVG");
 	}
