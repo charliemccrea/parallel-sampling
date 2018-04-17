@@ -1,0 +1,41 @@
+rm -f p_anisotropic omp_anisotropic *.class
+gcc -pthread -o p_anisotropic parallel_anisotropic.c
+gcc -fopenmp -o omp_anisotropic omp_anisotropic.c
+javac SequentialSampling.java
+Earth File Tests
+=== 0.10 ===
+Sampling took 29.0000 seconds
+Hits: 4368089
+Misses: 43680905
+=== 0.08 ===
+Sampling took 36.0000 seconds
+Hits: 4446172
+Misses: 55577167
+=== 0.05 ===
+Sampling took 56.0000 seconds
+Hits: 4542868
+Misses: 90857374
+=== 0.03 ===
+Sampling took 94.0000 seconds
+Hits: 4579955
+Misses: 152665184
+=== 0.05 at 16 Threads ===
+Sampling took 57.0000 seconds
+Hits: 4543537
+Misses: 90870754
+=== 0.05 at 8 Threads ===
+Sampling took 56.0000 seconds
+Hits: 4542510
+Misses: 90850206
+=== 0.05 at 4 Threads ===
+Sampling took 56.0000 seconds
+Hits: 4543254
+Misses: 90865086
+=== 0.05 at 2 Threads ===
+Sampling took 56.0000 seconds
+Hits: 4542448
+Misses: 90848966
+=== 0.05 at 1 Threads ===
+Sampling took 55.0000 seconds
+Hits: 4543277
+Misses: 90865546
