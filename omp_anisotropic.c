@@ -8,7 +8,7 @@
 # ifdef TIMING
 #include <time.h>
 # endif
-# ifdef OPENMP
+# ifdef _OPENMP
 #include <omp.h>
 # endif
 
@@ -93,10 +93,11 @@ update_ratio(int occupied)
 void sample()
 {
     int occupied = 0;
-    # pragma omp parallel default(none) shared(occupied,hits,misses,color_values,img_width,img_height,exit_ratio,pixels) 
-    {
-      do
-      {
+    printf("OMP Spawning threads\n");
+  do
+  {
+    //# pragma omp parallel default(none) shared(occupied,hits,misses,color_values,img_width,img_height,exit_ratio,pixels) 
+    //{
         dart_t d;
         d.x = rand() % img_width;
         d.y = rand() % img_height;
@@ -107,7 +108,7 @@ void sample()
 
         long i;
         long j;
-        # pragma omp for reduction(+:occupied)
+        # pragma omp parallel for collapse(2)
         for (i = -1*d.radius; i < d.radius; i++)
         {
           for (j = -1*d.radius; j < d.radius; j++)
@@ -123,9 +124,12 @@ void sample()
             }
           }
         }
+        # pragma omp barrier
+        //printf("Occupied: %d\n", occupied);
         //if unoccupied, maintain lock and write new placement of dart to pixel with radius filled.
         if (!occupied)
         {
+          # pragma omp parallel for collapse(2)
           for (i = -1 * d.radius; i < d.radius; i++)
           {
             for (j = -1 * d.radius; j < d.radius; j++)
@@ -138,11 +142,17 @@ void sample()
               }
             }
           }
+          //printf("New Point: %ld %ld\n", d.x, d.y);
         }     
-        update_ratio(occupied);
-      }
-      while(misses == 0 || (double)hits/misses > exit_ratio);
-    }
+        # pragma omp critical
+        {
+            update_ratio(occupied);
+        }
+        # pragma omp barrier
+    //}
+    //printf("Ratio: %.4f, hits: %ld, misses: %ld\n", (double) hits/misses, hits, misses);
+  }
+  while(misses == 0 || (double)hits/misses > exit_ratio);
 }
 
 int
@@ -229,7 +239,7 @@ main(int argc, char **argv)
   sample();
 # ifdef TIMING
   time_t end = time(NULL);
-  printf("Sampling took %0.4f seconds\n", (double)(end - start));
+  printf("Sampling took %0.2f seconds\n", (double)(end - start));
 # endif
   
   printf("Hits: %ld\nMisses: %ld\n", hits, misses);

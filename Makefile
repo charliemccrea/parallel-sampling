@@ -1,4 +1,4 @@
-TARGETS=parallel_anisotropic omp_anisotropic serial
+TARGETS=clean parallel_anisotropic omp_anisotropic serial
 
 all: $(TARGETS)
 
