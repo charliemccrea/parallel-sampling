@@ -21,12 +21,27 @@ typedef struct {
 #define ARGS 4
 // When an invalid thread count is specified, will operate serially.
 #define SERIAL 1
+// Change this if the function to determine the radius increases.
+#define MAX_RADIUS 10
 
 /*
  * To access the shared pixels array and the hit and miss variables, must use theses locks.
  */
 pthread_mutex_t pixel_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t hit_miss_lock = PTHREAD_MUTEX_INITIALIZER;
+
+/*
+ * Replace above mutexes with array of mutexes corresponding to row/column.
+ *
+ * Column:
+ *  - 10px wide? (img_width / 10 = columns)
+ *  - dart placement: (d.x / 10 = column number?)
+ *  - check if the radius of a dart crosses over to the next column, then lock both
+ *    - The key here is that only 2 columns max can be locked by a single dart
+ *
+ */
+
+
 
 long **pixels; //Contains value representing a occupied space or unused space on the image by darts being thrown
 long **color_values; //Contains the color value for that pixel space
