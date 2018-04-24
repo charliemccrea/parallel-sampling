@@ -27,20 +27,18 @@ typedef struct {
 /*
  * To access the shared pixels array and the hit and miss variables, must use theses locks.
  */
-pthread_mutex_t pixel_lock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t hit_miss_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /*
  * Replace above mutexes with array of mutexes corresponding to row/column.
  *
  * Column:
- *  - 10px wide? (img_width / 10 = columns)
- *  - dart placement: (d.x / 10 = column number?)
+ *  - 10px wide? (img_width / MAX_RADIUS = columns)
+ *  - dart placement: (d.x / MAX_RADIUS = column number?)
  *  - check if the radius of a dart crosses over to the next column, then lock both
- *    - The key here is that only 2 columns max can be locked by a single dart
- *
+ *    - The key change here is that only 3 columns max can be locked by a single dart, more parallel placements
  */
-
+pthread_mutex_t* cols;
 
 
 long **pixels; //Contains value representing a occupied space or unused space on the image by darts being thrown
@@ -48,13 +46,13 @@ long **color_values; //Contains the color value for that pixel space
 
 long img_width;
 long img_height;
-long array_size;
-float exit_ratio;
+long num_cols;
 long hits;
 long misses;
+float exit_ratio;
 
 int
-parse_command_line(int argc, char **argv, FILE **grey_file, float *ratio, int *nthreads)
+cli(int argc, char **argv, FILE **grey_file, float *ratio, int *nthreads)
 {
   if (argc != ARGS)
   {
@@ -118,8 +116,44 @@ update_ratio(int occupied)
   pthread_mutex_unlock(&hit_miss_lock);
 }
 
+/**
+ * Locks appropriate columns for point insertion
+ */
+void lock_cols(long before, long after, long col)
+{
+  if (before < col && before >= 0)
+  {
+    pthread_mutex_lock(&cols[before]);
+  }
+  if (after > col && col <= num_cols)
+  {
+    pthread_mutex_lock(&cols[after]);
+  }
+  pthread_mutex_lock(&cols[col]);
+  printf("Locked %ld, %ld, %ld\n", before, col, after);
+}
+
+/**
+ * Unlocks appropriate columns for point insertion
+ */
+void unlock_cols(long before, long after, long col)
+{
+  if (before >= 0)
+  {
+    pthread_mutex_unlock(&cols[before]);
+  }
+  if (col <= num_cols)
+  {
+    pthread_mutex_unlock(&cols[after]);
+  }
+  pthread_mutex_unlock(&cols[col]);
+  printf("Unlocked %ld, %ld, %ld\n", before, col, after);
+}
+
 void *sample(void *p)
 {
+  long i, j, a, b, col, before, after;
+  int occupied;
   do
   {
     dart_t d;
@@ -128,19 +162,22 @@ void *sample(void *p)
     d.color_value = color_values[d.y][d.x];
     d.radius = radius_size(d.color_value);
     
-    int occupied = 0;
+    occupied = 0;
 
-    // (need lock)
-    pthread_mutex_lock(&pixel_lock);
+    printf("%ld, %ld, col: %ld, r: %d\n", d.x, d.y, d.x/MAX_RADIUS, d.radius);
+    col = d.x / MAX_RADIUS;
+    before = (d.x - d.radius) / MAX_RADIUS;
+    after = (d.x + d.radius) / MAX_RADIUS;
+
+    lock_cols(before, after, col);
+
     // Determine if point and, within its radius, is occupied
-    long i;
-    long j;
     for (i = -1*d.radius; i < d.radius && !occupied; i++)
     {
       for (j = -1*d.radius; j < d.radius && !occupied; j++)
       {
-        long a = i + d.x;
-        long b = j + d.y;
+        a = i + d.x;
+        b = j + d.y;
         if (a >= 0 && a < img_width && b >= 0 && b < img_height)
         {
           if (pixels[b][a])
@@ -157,16 +194,18 @@ void *sample(void *p)
       {
         for (j = -1 * d.radius; j < d.radius; j++)
         {
-          long a = i + d.x;
-          long b = j + d.y;
+          a = i + d.x;
+          b = j + d.y;
           if (a >= 0 && a < img_width && b >= 0 && b < img_height)
           {
             pixels[b][a] = 1;
           }
         }
       }
-    }     
-    pthread_mutex_unlock(&pixel_lock);  
+    }
+    printf("Waiting for unlock.\n");
+    unlock_cols(before, after, col);    
+    printf("Unlocked.\n"); 
     update_ratio(occupied);
   }
   while(misses == 0 || (double)hits/misses > exit_ratio);
@@ -202,20 +241,32 @@ main(int argc, char **argv)
 {
   FILE* grey_file;
   int nthreads;
+  long i;
+  long j;
+  long value;
 
-  if (parse_command_line(argc, argv, &grey_file, &exit_ratio, &nthreads)) 
+  if (cli(argc, argv, &grey_file, &exit_ratio, &nthreads)) 
   {
     printf("Exited on failed command line parsing.\n");
     return 1;
   }
   pthread_t threads[nthreads];
-
+  
   if (fscanf(grey_file, "%ld %ld\n", &img_width, &img_height) < 2)
   {
     fprintf(stderr, "Failed to read from given .grey file the dimensions of the image!\n");
     return 1;
   }
-  array_size = img_width * img_height;
+  
+  num_cols = (img_width / MAX_RADIUS);
+  num_cols += img_width % MAX_RADIUS > 0 ? 1 : 0;
+  cols = malloc(sizeof(pthread_mutex_t) * num_cols);
+  for (i = 0; i < num_cols; i++)
+  {
+    pthread_mutex_init(&cols[i], NULL);
+  }
+  printf("W,H: %ld, %ld\nNumber of columns: %ld\n", img_width, img_height, num_cols);
+
   if (setup_arrays())
   {
     return 1;
@@ -233,9 +284,6 @@ main(int argc, char **argv)
 # ifdef INFO
   printf("Reading in color values...\n");
 # endif
-  long i;
-  long j;
-  long value;
   for (i = 0; i < img_height; i++)
   {
     for (j = 0; j < img_width; j++)
@@ -270,5 +318,9 @@ main(int argc, char **argv)
 # endif
   
   printf("Hits: %ld\nMisses: %ld\n", hits, misses);
+
+  free(color_values);
+  free(pixels);
+  //free(cols);
   return 0;
 }

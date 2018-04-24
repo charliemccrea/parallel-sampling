@@ -24,10 +24,10 @@ def toText(filename):
     for x in range(width):
         for y in range(height):
             s = ""
-            if type(pixels[x,y]) is list:
-                s = str(pixels[x,y][0])
-            elif type(pixels[x,y]) is int:
+            if type(pixels[x,y]) is int:
                 s = str(pixels[x,y])
+            else:
+                s = str(pixels[x,y][0])
             output.write(s + "\n")
     return;
 
@@ -43,7 +43,7 @@ def toImage(filename):
     image.save(filename.split(".")[0] + ".converted.png")
     return;
 
-if len(sys.argv) < 1:
+if len(sys.argv) < 2:
     usage();
 try:
     opts,args = getopt.getopt(sys.argv[1:], "t:i:u", 
