@@ -4,6 +4,7 @@
 #include <pthread.h>
 
 # define TIMING
+//# define DEBUG
 //# define INFO
 
 # ifdef TIMING
@@ -119,18 +120,31 @@ update_ratio(int occupied)
 /**
  * Locks appropriate columns for point insertion
  */
-void lock_cols(long before, long after, long col)
+int lock_cols(long before, long after, long col)
 {
+  int ret = 0;
   if (before < col && before >= 0)
   {
-    pthread_mutex_lock(&cols[before]);
+    ret = pthread_mutex_trylock(&cols[before]);
   }
+  if (ret != 0)
+    return -1;
+
   if (after > col && col <= num_cols)
   {
-    pthread_mutex_lock(&cols[after]);
+    ret = pthread_mutex_trylock(&cols[after]);
   }
-  pthread_mutex_lock(&cols[col]);
-  printf("Locked %ld, %ld, %ld\n", before, col, after);
+  if (ret != 0)
+  {
+    pthread_mutex_unlock(&cols[before]);
+    return -1;
+  }
+  ret = pthread_mutex_trylock(&cols[col]);
+  if (ret != 0) 
+    return -1;
+  else
+    return 0;
+//  printf("Locked %ld, %ld, %ld\n", before, col, after);
 }
 
 /**
@@ -138,16 +152,16 @@ void lock_cols(long before, long after, long col)
  */
 void unlock_cols(long before, long after, long col)
 {
-  if (before >= 0)
+  if (before < col && before >= 0)
   {
     pthread_mutex_unlock(&cols[before]);
   }
-  if (col <= num_cols)
+  if (after > col && col <= num_cols)
   {
     pthread_mutex_unlock(&cols[after]);
   }
   pthread_mutex_unlock(&cols[col]);
-  printf("Unlocked %ld, %ld, %ld\n", before, col, after);
+//  printf("Unlocked %ld, %ld, %ld\n", before, col, after);
 }
 
 void *sample(void *p)
@@ -164,49 +178,52 @@ void *sample(void *p)
     
     occupied = 0;
 
-    printf("%ld, %ld, col: %ld, r: %d\n", d.x, d.y, d.x/MAX_RADIUS, d.radius);
     col = d.x / MAX_RADIUS;
     before = (d.x - d.radius) / MAX_RADIUS;
     after = (d.x + d.radius) / MAX_RADIUS;
 
-    lock_cols(before, after, col);
-
-    // Determine if point and, within its radius, is occupied
-    for (i = -1*d.radius; i < d.radius && !occupied; i++)
+    if (lock_cols(before, after, col) == 0)
     {
-      for (j = -1*d.radius; j < d.radius && !occupied; j++)
+#     ifdef DEBUG
+      printf("[DEBUG] H M R: %ld %ld %f\n", hits, misses, (double)hits/misses);
+#     endif
+      // Determine if point and, within its radius, is occupied
+      for (i = -1*d.radius; i < d.radius && !occupied; i++)
       {
-        a = i + d.x;
-        b = j + d.y;
-        if (a >= 0 && a < img_width && b >= 0 && b < img_height)
-        {
-          if (pixels[b][a])
-          {
-            occupied = 1;
-          }
-        }
-      }
-    }
-    //if unoccupied, maintain lock and write new placement of dart to pixel with radius filled.
-    if (!occupied)
-    {
-      for (i = -1 * d.radius; i < d.radius; i++)
-      {
-        for (j = -1 * d.radius; j < d.radius; j++)
+        for (j = -1*d.radius; j < d.radius && !occupied; j++)
         {
           a = i + d.x;
           b = j + d.y;
           if (a >= 0 && a < img_width && b >= 0 && b < img_height)
           {
-            pixels[b][a] = 1;
+            if (pixels[b][a])
+            {
+              occupied = 1;
+            }
           }
         }
       }
+      //if unoccupied, maintain lock and write new placement of dart to pixel with radius filled.
+      if (!occupied)
+      {
+        for (i = -1 * d.radius; i < d.radius; i++)
+        {
+          for (j = -1 * d.radius; j < d.radius; j++)
+          {
+            a = i + d.x;
+            b = j + d.y;
+            if (a >= 0 && a < img_width && b >= 0 && b < img_height)
+            {
+              pixels[b][a] = 1;
+            }
+          }
+        }
+      }
+      // Only releasing locks if locks were acquired
+      unlock_cols(before, after, col);    
+      // Only updating ratio if when through checks.
+      update_ratio(occupied);
     }
-    printf("Waiting for unlock.\n");
-    unlock_cols(before, after, col);    
-    printf("Unlocked.\n"); 
-    update_ratio(occupied);
   }
   while(misses == 0 || (double)hits/misses > exit_ratio);
   return NULL;
@@ -314,13 +331,19 @@ main(int argc, char **argv)
   }
 # ifdef TIMING
   time_t end = time(NULL);
-  printf("Sampling took %0.4f seconds\n", (double)(end - start));
+  printf("Sampling took %0.4f seconds\n", ((double)end - start));
 # endif
-  
+# ifdef INFO
   printf("Hits: %ld\nMisses: %ld\n", hits, misses);
+# endif
+  for (i = 0; i < img_height; i++)
+  {
+    free(color_values[i]);
+    free(pixels[i]);
+  }
 
   free(color_values);
   free(pixels);
-  //free(cols);
+  free(cols);
   return 0;
 }
