@@ -5,7 +5,7 @@
 
 # define TIMING
 //# define DEBUG
-//# define INFO
+# define INFO
 
 # ifdef TIMING
 #include <time.h>
@@ -23,15 +23,15 @@ typedef struct {
 // When an invalid thread count is specified, will operate serially.
 #define SERIAL 1
 // Change this if the function to determine the radius increases.
-#define COL_WIDTH 50
+#define COL_WIDTH 100
 // Max consecutive misses
-#define MAX_MISSES 1000
-
+//#define MAX_MISSES_PER_THREAD 250
+int MAX_MISSES_PER_THREAD;
 /*
  * To access the shared pixels array and the hit and miss variables, must use theses locks.
  */
-//pthread_mutex_t hit_miss_lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t miss_lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t count_lock = PTHREAD_MUTEX_INITIALIZER;
+
 /*
  * Replace above mutexes with array of mutexes corresponding to row/column.
  *
@@ -46,20 +46,18 @@ pthread_mutex_t* cols;
 
 long **pixels; //Contains value representing a occupied space or unused space on the image by darts being thrown
 long **color_values; //Contains the color value for that pixel space
-
+int nthreads;
 long img_width;
 long img_height;
 long num_cols;
-//long hits;
-long misses;
-//float exit_ratio;
+//long misses;
 
 int
-cli(int argc, char **argv, FILE **grey_file, /*float *ratio,*/ int *nthreads)
+cli(int argc, char **argv, FILE **grey_file, int *nthreads)
 {
   if (argc != ARGS)
   {
-    fprintf(stderr, "The input must contain the arguments:\n\t./parallel_sampling <.grey> <ratio> <num-threads>\nWhere the .grey is the relative filename to the converted image to text\nAnd ratio is a value between 0.01 and 0.99 to determine when to stop sampling the image for the hits/misses ratio.\n");
+    fprintf(stderr, "The input must contain the arguments: <.grey> <num-threads>\nWhere the .grey is the relative filename to the converted image to text\n");
     return 1;
   }
   
@@ -70,18 +68,12 @@ cli(int argc, char **argv, FILE **grey_file, /*float *ratio,*/ int *nthreads)
     return 1;
   }
   
-//  if (sscanf(argv[2], "%f", ratio) < 1)
-//  {
-//    fprintf(stderr, "Could not get ratio from input %s\n", argv[1]);
-//    return 1;
-//  }
-  
   *nthreads = atoi(argv[2]);
   if (*nthreads <= 0) {
     *nthreads = SERIAL;
     fprintf(stderr, "Reseting nthreads to %d, given invalid input.\n", *nthreads); 
   }
-  
+
   return 0;
 }
 
@@ -103,21 +95,6 @@ radius_size(long color_value)
     radius = 1;
   return radius;  
 }
-
-//void
-//update_ratio(int occupied)
-//{
-  //pthread_mutex_lock(&hit_miss_lock);
-  //if (!occupied)
-  //{
-  //  hits++;
-  //}
-  //else
-  //{
-  //  misses++;
-  //}
-  //pthread_mutex_unlock(&hit_miss_lock);
-//}
 
 /**
  * Locks appropriate columns for point insertion
@@ -146,7 +123,6 @@ int lock_cols(long before, long after, long col)
     return -1;
   else
     return 0;
-//  printf("Locked %ld, %ld, %ld\n", before, col, after);
 }
 
 /**
@@ -168,8 +144,12 @@ void unlock_cols(long before, long after, long col)
 
 void *sample(void *p)
 {
-  long i, j, a, b, col, before, after;
-  int occupied;
+  long i, j, a, b;
+  long misses;
+  int occupied, col, before, after;
+  
+  misses = 0;
+  
   do
   {
     dart_t d;
@@ -177,18 +157,18 @@ void *sample(void *p)
     d.y = rand() % img_height;
     d.color_value = color_values[d.y][d.x];
     d.radius = radius_size(d.color_value);
-    
     occupied = 0;
 
+    // Find which columns could be effected by this point placement.
     col = d.x / COL_WIDTH;
     before = (d.x - d.radius) / COL_WIDTH;
     after = (d.x + d.radius) / COL_WIDTH;
 
+    // Locks columns if able to, if unable, will skip and find another point to place
     if (lock_cols(before, after, col) == 0)
     {
 #     ifdef DEBUG
-//      printf("[DEBUG] H M R: %ld %ld %f\n", hits, misses, (double)hits/misses);
-      if (misses > 500) printf("[DEBUG] CONSECUTIVE MISSES: %ld\n", misses);
+      if (misses > (MAX_MISSES_PER_THREAD/2)) printf("[DEBUG] CONSECUTIVE MISSES: %ld\n", misses);
 #     endif
       // Determine if point and, within its radius, is occupied
       for (i = -1*d.radius; i < d.radius && !occupied; i++)
@@ -222,18 +202,20 @@ void *sample(void *p)
           }
         }
       }
-      // Only releasing locks if locks were acquired
       unlock_cols(before, after, col);    
-      //update_ratio(occupied);
-      pthread_mutex_lock(&miss_lock);
+      //pthread_mutex_lock(&count_lock);
       if (occupied)
+      {
         misses++;
+      }
       else
+      {
         misses = 0;
-      pthread_mutex_unlock(&miss_lock);
+      }
+      //pthread_mutex_unlock(&count_lock);
     }
   }
-  while(misses < MAX_MISSES);
+  while(misses < MAX_MISSES_PER_THREAD);
   return NULL;
 }
 
@@ -265,7 +247,6 @@ int
 main(int argc, char **argv)
 {
   FILE* grey_file;
-  int nthreads;
   long i;
   long j;
   long value;
@@ -290,7 +271,6 @@ main(int argc, char **argv)
   {
     pthread_mutex_init(&cols[i], NULL);
   }
-  printf("W,H: %ld, %ld\nNumber of columns: %ld\n", img_width, img_height, num_cols);
 
   if (setup_arrays())
   {
@@ -306,9 +286,7 @@ main(int argc, char **argv)
     fprintf(stderr,"Cannot allocate space for the pixel values.\n");
     return 1;
   }
-# ifdef INFO
-  printf("Reading in color values...\n");
-# endif
+  
   for (i = 0; i < img_height; i++)
   {
     for (j = 0; j < img_width; j++)
@@ -318,17 +296,18 @@ main(int argc, char **argv)
         color_values[i][j] = value;
       }
     }
-  }  
+  }
+
+  MAX_MISSES_PER_THREAD = 15000/nthreads;
 # ifdef INFO
-  printf("Multithreaded Anisotropic Sampling\n\t\tStarted with %d threads, will end at %d consecutive misses.\n\t\tUsing grey file: %s (%ld, %ld)\n", nthreads, MAX_MISSES, argv[1], img_width, img_height);
+  printf("Multithreaded Anisotropic Sampling\n\t\tStarted with %d threads, will end at %d consecutive misses.\n\t\tUsing grey file: %s (%ld, %ld) with %d columns\n", nthreads, MAX_MISSES_PER_THREAD, argv[1], img_width, img_height, num_cols);
 # endif 
 # ifdef TIMING
   time_t start = time(NULL);
 # endif
   time_t t;
-  srand((unsigned) time(&t));
-  //hits = 0;
-  //misses = 0;
+  srand((unsigned) time(&t));  
+
   for (i = 0; i < nthreads; i++)
   {
     pthread_create(&threads[i], NULL, sample, NULL);    
@@ -339,10 +318,7 @@ main(int argc, char **argv)
   }
 # ifdef TIMING
   time_t end = time(NULL);
-  printf("Sampling took %0.4f seconds\n", ((double)end - start));
-# endif
-# ifdef INFO
-  //printf("Hits: %ld\nMisses: %ld\n", hits, misses);
+  printf("Sampling took %d seconds\n", end - start);
 # endif
   for (i = 0; i < img_height; i++)
   {
