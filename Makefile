@@ -1,4 +1,5 @@
-TARGETS=clean parallel_anisotropic omp_anisotropic java_anisotropic serial
+TARGETS=clean parallel_anisotropic locked_col_anisotropic omp_anisotropic java_anisotropic serial 
+CC=gcc -pthread -Wall -o
 
 all: $(TARGETS)
 
@@ -7,8 +8,10 @@ serial:
 java_anisotropic:
 	javac AnisotropicSerial.java
 parallel_anisotropic:
-	gcc -pthread -o p_anisotropic parallel_anisotropic.c
+	$(CC) p_anisotropic parallel_anisotropic.c
+locked_col_anisotropic:
+	$(CC) col_threads column_threads.c 
 omp_anisotropic:
 	gcc -fopenmp -o omp_anisotropic omp_anisotropic.c
 clean:
-	rm -f p_anisotropic omp_anisotropic *.class
+	rm -f p_anisotropic col_threads omp_anisotropic *.class
