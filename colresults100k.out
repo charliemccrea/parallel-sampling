@@ -1,0 +1,32 @@
+Multithreaded Anisotropic Sampling
+		Started with 1 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 8192 columns
+Sampling took 0.0188 seconds
+Multithreaded Anisotropic Sampling
+		Started with 2 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 4096 columns
+Sampling took 0.0714 seconds
+Multithreaded Anisotropic Sampling
+		Started with 4 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 2048 columns
+Sampling took 0.1428 seconds
+Multithreaded Anisotropic Sampling
+		Started with 8 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 1024 columns
+Sampling took 0.3294 seconds
+Multithreaded Anisotropic Sampling
+		Started with 16 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 512 columns
+Sampling took 0.7123 seconds
+Multithreaded Anisotropic Sampling
+		Started with 32 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 256 columns
+Sampling took 1.4376 seconds
+Multithreaded Anisotropic Sampling
+		Started with 64 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 128 columns
+Sampling took 2.8867 seconds
+Multithreaded Anisotropic Sampling
+		Started with 128 threads, will end at 100000 consecutive misses.
+		Using grey file: tests/earth.grey (8192, 4096) with 64 columns
+Sampling took 5.7577 seconds
