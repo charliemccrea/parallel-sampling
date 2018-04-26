@@ -60,18 +60,18 @@ cli(int argc, char **argv, FILE **grey_file, int *nthreads)
     fprintf(stderr, "The input must contain the arguments: <.grey> <num-threads>\nWhere the .grey is the relative filename to the converted image to text\n");
     return 1;
   }
-  
+
   *grey_file = fopen(argv[1], "r");
   if (*grey_file == NULL)
   {
     fprintf(stderr, "Could not open file %s\n", argv[1]);
     return 1;
   }
-  
+
   *nthreads = atoi(argv[2]);
   if (*nthreads <= 0) {
     *nthreads = SERIAL;
-    fprintf(stderr, "Reseting nthreads to %d, given invalid input.\n", *nthreads); 
+    fprintf(stderr, "Reseting nthreads to %d, given invalid input.\n", *nthreads);
   }
 
   return 0;
@@ -93,7 +93,7 @@ radius_size(long color_value)
     radius = 2;
   else
     radius = 1;
-  return radius;  
+  return radius;
 }
 
 /**
@@ -119,7 +119,7 @@ int lock_cols(long before, long after, long col)
     return -1;
   }
   ret = pthread_mutex_trylock(&cols[col]);
-  if (ret != 0) 
+  if (ret != 0)
     return -1;
   else
     return 0;
@@ -147,9 +147,9 @@ void *sample(void *p)
   long i, j, a, b;
   long misses;
   int occupied, col, before, after;
-  
+
   misses = 0;
-  
+
   do
   {
     dart_t d;
@@ -202,7 +202,7 @@ void *sample(void *p)
           }
         }
       }
-      unlock_cols(before, after, col);    
+      unlock_cols(before, after, col);
       //pthread_mutex_lock(&count_lock);
       if (occupied)
       {
@@ -230,7 +230,7 @@ setup_arrays()
     color_values[i] = calloc(img_width, sizeof(long));
     pixels[i] = calloc(img_width, sizeof(long));
     if (color_values[i] == NULL)
-    { 
+    {
       printf("Color values failed allocation\n");
       return 1;
     }
@@ -251,19 +251,19 @@ main(int argc, char **argv)
   long j;
   long value;
 
-  if (cli(argc, argv, &grey_file, /*&exit_ratio,*/ &nthreads)) 
+  if (cli(argc, argv, &grey_file, /*&exit_ratio,*/ &nthreads))
   {
     printf("Exited on failed command line parsing.\n");
     return 1;
   }
   pthread_t threads[nthreads];
-  
+
   if (fscanf(grey_file, "%ld %ld\n", &img_width, &img_height) < 2)
   {
     fprintf(stderr, "Failed to read from given .grey file the dimensions of the image!\n");
     return 1;
   }
-  
+
   num_cols = (img_width / COL_WIDTH);
   num_cols += img_width % COL_WIDTH > 0 ? 1 : 0;
   cols = malloc(sizeof(pthread_mutex_t) * num_cols);
@@ -286,7 +286,7 @@ main(int argc, char **argv)
     fprintf(stderr,"Cannot allocate space for the pixel values.\n");
     return 1;
   }
-  
+
   for (i = 0; i < img_height; i++)
   {
     for (j = 0; j < img_width; j++)
@@ -300,25 +300,25 @@ main(int argc, char **argv)
 
   MAX_MISSES_PER_THREAD = 15000/nthreads;
 # ifdef INFO
-  printf("Multithreaded Anisotropic Sampling\n\t\tStarted with %d threads, will end at %d consecutive misses.\n\t\tUsing grey file: %s (%ld, %ld) with %d columns\n", nthreads, MAX_MISSES_PER_THREAD, argv[1], img_width, img_height, num_cols);
-# endif 
+  printf("Multithreaded Anisotropic Sampling\n\t\tStarted with %d threads, will end at %d consecutive misses.\n\t\tUsing grey file: %s (%ld, %ld) with %ld columns\n", nthreads, MAX_MISSES_PER_THREAD, argv[1], img_width, img_height, num_cols);
+# endif
 # ifdef TIMING
   time_t start = time(NULL);
 # endif
   time_t t;
-  srand((unsigned) time(&t));  
+  srand((unsigned) time(&t));
 
   for (i = 0; i < nthreads; i++)
   {
-    pthread_create(&threads[i], NULL, sample, NULL);    
-  }  
+    pthread_create(&threads[i], NULL, sample, NULL);
+  }
   for (i = 0; i < nthreads; i++)
   {
     pthread_join(threads[i], NULL);
   }
 # ifdef TIMING
   time_t end = time(NULL);
-  printf("Sampling took %d seconds\n", end - start);
+  printf("Sampling took %ld seconds\n", end - start);
 # endif
   for (i = 0; i < img_height; i++)
   {

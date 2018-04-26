@@ -8,7 +8,13 @@
 # define INFO
 
 # ifdef TIMING
-#include <time.h>
+#   include <sys/time.h>
+    struct timeval _tv;
+#   define START_TIMER(X) gettimeofday(&_tv, NULL); \
+        double _timer_ ## X = _tv.tv_sec+(_tv.tv_usec/1000000.0);
+#   define STOP_TIMER(X)  gettimeofday(&_tv, NULL); \
+        _timer_ ## X = _tv.tv_sec+(_tv.tv_usec/1000000.0) - (_timer_ ## X);
+#   define GET_TIMER(X)   (_timer_ ## X)
 # endif
 
 typedef struct {
@@ -153,7 +159,11 @@ void *sample(void *p)
   do
   {
     dart_t d;
-    d.x = (rand() % COL_WIDTH) + (COL_WIDTH * thread_id);
+    /* Solves problem of dart in last column being placed out of img bounds*/
+    while (d.x < 0 || d.x >= img_width)
+    {
+      d.x = (rand() % COL_WIDTH) + (COL_WIDTH * thread_id);
+    }
     d.y = rand() % img_height;
 
     d.color_value = color_values[d.y][d.x];
@@ -304,7 +314,7 @@ main(int argc, char **argv)
   printf("Multithreaded Anisotropic Sampling\n\t\tStarted with %d threads, will end at %d consecutive misses.\n\t\tUsing grey file: %s (%ld, %ld) with %ld columns\n", nthreads, MAX_MISSES_PER_THREAD, argv[1], img_width, img_height, num_cols);
 # endif
 # ifdef TIMING
-  time_t start = time(NULL);
+  START_TIMER(darts);
 # endif
   time_t t;
   srand((unsigned) time(&t));
@@ -319,8 +329,8 @@ main(int argc, char **argv)
     pthread_join(threads[i], NULL);
   }
 # ifdef TIMING
-  time_t end = time(NULL);
-  printf("Sampling took %ld seconds\n", end - start);
+  STOP_TIMER(darts);
+  printf("Sampling took %0.4f seconds\n", GET_TIMER(darts));
 # endif
   for (i = 0; i < img_height; i++)
   {
