@@ -309,7 +309,7 @@ main(int argc, char **argv)
     }
   }
   uint16_t *thread_id = calloc(nthreads, sizeof(uint16_t));
-  MAX_MISSES_PER_THREAD = 2000;
+  MAX_MISSES_PER_THREAD = 1000;
 # ifdef INFO
   printf("Multithreaded Anisotropic Sampling\n\t\tStarted with %d threads, will end at %d consecutive misses.\n\t\tUsing grey file: %s (%ld, %ld) with %ld columns\n", nthreads, MAX_MISSES_PER_THREAD, argv[1], img_width, img_height, num_cols);
 # endif
