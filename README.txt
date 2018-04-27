@@ -16,13 +16,10 @@ C IMPLEMENTATIONS
 column_threads.c
 omp_anisotropic.c
 parallel_anisotropic.c
-serial_threaded.c
 
 JAVA IMPLEMENTATIONS
 AnisotropicSerial.java
-ParallelIsoSampling.java
 SequentialSampling.java
-StreamSampling.java
 
 PYTHON IMAGE CONVERTER
 converter.py
