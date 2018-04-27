@@ -22,7 +22,6 @@ JAVA IMPLEMENTATIONS
 AnisotropicSerial.java
 ParallelIsoSampling.java
 SequentialSampling.java
-StreamSampling.java
 
 PYTHON IMAGE CONVERTER
 converter.py
