@@ -27,7 +27,6 @@ converter.py
 TEST SCRIPTS
 array_test.sh
 omp_test.sh
-open-all.sh
 run.sh
 run_col_threads.sh
 stress_test.sh
@@ -50,8 +49,17 @@ to a .grey file before it may be used in the java program with the original file
 
 
 To Compile all necessary programs call 'make'
+To run our set tests you can run:
+'array_test.sh'
+'omp_test.sh'
+'run.sh'
+'run_col_threads.sh'
+'stress_test.sh'
+
+The .grey.html images can be viewed in any web browser that supports svg.
 
 
+To run your own tests:
 
 SequentialSampling takes in the .grey and the .jpg/.png file in that order. It outputs a .grey.html file that can be
 opened in a web browser to show the distribution of the sampling darts. Darts and their radii are drawn as red circles
@@ -60,9 +68,21 @@ on the source image.
 Once you have a file in .grey and .png format, you may use the Java SequentialSampling program.
 'java SequentialSampling puppy.grey puppy.jpg' runs it on a single source image.
 
-You can also run the testing script ./run.sh to run multiple tests at once.
+For column_threads.c
+The input must contain the arguments: <.grey> <num-threads>  
+Where the .grey is the relative filename to the converted image to text
 
-The .grey.html images can be viewed in any web browser that supports svg.
+For AnisotropicSerial
+java AnisotropicSerial <grey:file> <image:file> <ratio:double>
+
+For omp_anisotropic
+The input must contain the arguments ./parallel_sampling <.grey> <ratio> <num-threads>
+Where the .grey is the relative filename to the converted image to text and ratio is a value between 0.01 and 0.99 to determine when to stop sampling the image for the hits/misses ratio
+
+For parallel_anisotropic
+The input must contain the arguments: <.grey> <num-threads>
+Where the .grey is the relative filename to the converted image to text
+
 
 Other .png/.jpg files are the data set that we used for testing. The ColorValueRef was used for
 checking the results of the python script and will be useful in the anisotropic version.
