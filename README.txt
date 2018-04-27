@@ -31,9 +31,18 @@ run.sh
 run_col_threads.sh
 stress_test.sh
 
+TEST IMAGES (in tests folder)
+bars.png
+earth.jpg
+puppy.jpg
+bars.grey
+earth.grey
+puppy.grey
+
 OTHER
 Makefile
 README.txt
+report.pdf
 
 
 (3) HOW TO USE
@@ -69,7 +78,7 @@ Once you have a file in .grey and .png format, you may use the Java SequentialSa
 'java SequentialSampling puppy.grey puppy.jpg' runs it on a single source image.
 
 For column_threads.c
-The input must contain the arguments: <.grey> <num-threads>  
+The input must contain the arguments: <.grey> <num-threads>
 Where the .grey is the relative filename to the converted image to text
 
 For AnisotropicSerial
@@ -86,7 +95,3 @@ Where the .grey is the relative filename to the converted image to text
 
 Other .png/.jpg files are the data set that we used for testing. The ColorValueRef was used for
 checking the results of the python script and will be useful in the anisotropic version.
-
-
-
-
